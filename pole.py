@@ -29,5 +29,5 @@ def dynamics(poles,pos,speed,dt=1/4,resistance=1/16):
     pos_next = pos + dt * speed
     return pos_next,speed_next
 
-print(dynamics(poles,np.array([0,0]),np.array([1,0])))
+print(dynamics(poles,np.array([1,0]),np.array([1,0])))
 
