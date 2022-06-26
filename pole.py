@@ -22,12 +22,11 @@ class Obstacle:
         return(self.equation(pos,self.params))
 
 class Game:
-    def __init__(self,environment,obstacles,user_input):
+    def __init__(self,environment,obstacles):
         self.environment = environment
         self.obstacles = obstacles
-        self.user_input = user_input
     def pole_evaluate(self,pos):
-        return sum([pole.evaluate(point) for pole in poles])
+        return sum([pole.evaluate(pos) for pole in poles])
     def dynamics(self,pos,speed):
         velocity = np.linalg.norm(speed)
         accel = self.pole_evaluate(pos) - self.environment.resistance\
@@ -45,14 +44,14 @@ class Game:
         speed = user_input[0]
         pos = self.environment.origin
         hist_pos = pos
-        while (not(self.stop_condition(self.environment,pos,speed,time))):
-            pos, speed, accel = \
-                self.dynamics(self,pos,speed)
+        while (not(self.stop_condition(pos,speed,time))):
+            pos, speed = \
+                self.dynamics(pos,speed)
             time += self.environment.dt
             hist_pos = np.vstack((hist_pos,pos))
         return [time,hist_pos,pos,speed]
     def print_report(self,user_input):
-        time,hist_pos,pos,speed = self.path_simulation(self.user_input)
+        time,hist_pos,pos,speed = self.path_simulation(user_input)
         print("Simulation has ended after {} seconds. The point is located at \
             {:4f}, {:4f} placement. The speed at the end was equal to {:4f}.\
                  Thank you for the participation!".format(time,pos[0],pos[1],np.linalg.norm(speed)))
