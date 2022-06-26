@@ -26,7 +26,7 @@ class Game:
         self.environment = environment
         self.obstacles = obstacles
     def pole_evaluate(self,pos):
-        return sum([pole.evaluate(pos) for pole in poles])
+        return sum([pole.evaluate(pos) for pole in self.obstacles])
     def dynamics(self,pos,speed):
         velocity = np.linalg.norm(speed)
         accel = self.pole_evaluate(pos) - self.environment.resistance\
@@ -68,19 +68,6 @@ def mountain(pos,params):
         distance = np.linalg.norm(diff)
         return np.exp(-distance**2)*magnitude*diff/distance
 
-pole_borders = np.array([[-5,5],[-5,5]], dtype=np.single)
-origin = [0,0]
 
-environment = Environment(pole_borders,origin,resistance=1/8,dt=1/4)
-
-pole1 = Obstacle(mountain,[np.array([1,1]),5],"first_mountain")
-pole2 = Obstacle(mountain,[np.array([2,-1]),8],"second_mountain")
-
-poles = [pole1,pole2]
-
-
-game = Game(environment,poles)
-
-game.print_report(np.array([1,1]))
 
 
