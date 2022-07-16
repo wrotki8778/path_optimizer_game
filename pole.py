@@ -41,7 +41,7 @@ class Game:
         return(no_speed or timeout or out_of_bounds)
     def path_simulation(self,user_input):
         time = 0
-        speed = user_input[0]
+        speed = [user_input[0],user_input[1]]
         pos = self.environment.origin
         hist_pos = pos
         while (not(self.stop_condition(pos,speed,time))):
