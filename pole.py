@@ -30,9 +30,9 @@ class Game:
     def dynamics(self,pos,speed):
         velocity = np.linalg.norm(speed)
         accel = self.pole_evaluate(pos) - self.environment.resistance\
-            *velocity*speed
-        speed_next = speed + self.environment.dt * accel
-        pos_next = pos + self.environment.dt * speed
+            *velocity*np.array(speed)
+        speed_next = speed + self.environment.dt * np.array(accel)
+        pos_next = pos + self.environment.dt * np.array(speed)
         return pos_next,speed_next
     def stop_condition(self,pos,speed,time):
         out_of_bounds=  self.environment.out_of_bounds(pos)
@@ -41,7 +41,7 @@ class Game:
         return(no_speed or timeout or out_of_bounds)
     def path_simulation(self,user_input):
         time = 0
-        speed = user_input[0]
+        speed = [user_input[0],user_input[1]]
         pos = self.environment.origin
         hist_pos = pos
         while (not(self.stop_condition(pos,speed,time))):
@@ -55,8 +55,12 @@ class Game:
         print("Simulation has ended after {} seconds. The point is located at \
             {:4f}, {:4f} placement. The speed at the end was equal to {:4f}.\
                  Thank you for the participation!".format(time,pos[0],pos[1],np.linalg.norm(speed)))
+        plt.xlim(self.environment.borders[0,0],\
+            self.environment.borders[0,1]),
+        plt.ylim(self.environment.borders[1,0],\
+            self.environment.borders[1,1])
         plt.plot(hist_pos[:,0],hist_pos[:,1], 'bo')
-        plt.savefig('foo.png')
+        plt.savefig('app/static/images/foo.png')
 
 def mountain(pos,params):
     center = params[0]

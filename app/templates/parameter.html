@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1> Choose the initial position here: </h1>
+        <form name = 'my-form' action="" method = "post" novalidate>
+            {{ form.csrf_token }}
+            <p>{{form.position1()}}</p>
+            <p>{{form.position2()}}</p>
+            <p>{{form.speed_amplitude()}}</p>
+            <p>{{form.speed_phase()}}</p>
+            <p>{{form.submit()}}</p>
+        </form>
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>
+                {{ message }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% if form.errors %}
+        {{ form.errors }}
+        {% endif %}
+{% endblock %}
