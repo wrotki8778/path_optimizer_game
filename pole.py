@@ -55,8 +55,12 @@ class Game:
         print("Simulation has ended after {} seconds. The point is located at \
             {:4f}, {:4f} placement. The speed at the end was equal to {:4f}.\
                  Thank you for the participation!".format(time,pos[0],pos[1],np.linalg.norm(speed)))
+        plt.xlim(self.environment.borders[0,0],\
+            self.environment.borders[0,1]),
+        plt.ylim(self.environment.borders[1,0],\
+            self.environment.borders[1,1])
         plt.plot(hist_pos[:,0],hist_pos[:,1], 'bo')
-        plt.savefig('foo.png')
+        plt.savefig('app/static/images/foo.png')
 
 def mountain(pos,params):
     center = params[0]

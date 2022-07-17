@@ -4,6 +4,7 @@ from app.forms import form_test
 import numpy as np
 import matplotlib.pyplot as plt
 import pole
+from config import Config
 
 @app.route('/', methods = ['GET','POST'])
 @app.route('/parameter', methods = ['GET','POST'])
@@ -23,15 +24,14 @@ def grab_parameters():
         title = 'Get parameters',form=form))
 @app.route('/evaluate', methods = ['GET','POST'])
 def evaluate():
-    pole_borders = np.array([[-5,5],[-5,5]], dtype=np.single)
     origin = np.array(session['pos_init'],dtype=np.single)
     user_input = np.array(session['speed_init'],dtype=np.single)
     environment = pole.Environment(\
-        pole_borders,origin,resistance=1/8,dt=1/4)
-    pole1 = pole.Obstacle(pole.mountain,[np.array([1,1]),5],"first_mountain")
-    pole2 = pole.Obstacle(pole.mountain,[np.array([2,-1]),8],"second_mountain")
-    poles = [pole1,pole2]
-    game = pole.Game(environment,poles)
+        Config.pole_borders,origin,\
+            resistance=Config.resistance,\
+                dt=Config.dt)
+    game = pole.Game(environment,\
+        Config.poles)
     game.print_report(user_input)
     return(render_template('evaluate.html', \
         title = 'Obtain results',results_image ="foo.png" ))
