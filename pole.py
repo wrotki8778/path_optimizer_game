@@ -30,9 +30,9 @@ class Game:
     def dynamics(self,pos,speed):
         velocity = np.linalg.norm(speed)
         accel = self.pole_evaluate(pos) - self.environment.resistance\
-            *velocity*speed
-        speed_next = speed + self.environment.dt * accel
-        pos_next = pos + self.environment.dt * speed
+            *velocity*np.array(speed)
+        speed_next = speed + self.environment.dt * np.array(accel)
+        pos_next = pos + self.environment.dt * np.array(speed)
         return pos_next,speed_next
     def stop_condition(self,pos,speed,time):
         out_of_bounds=  self.environment.out_of_bounds(pos)
