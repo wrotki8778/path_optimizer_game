@@ -27,8 +27,8 @@ def evaluate():
     origin = np.array(session['pos_init'],dtype=np.single)
     user_input = np.array(session['speed_init'],dtype=np.single)
     environment = pole.Environment(\
-        Config.pole_borders,origin,\
-            resistance=Config.resistance,\
+        Config.pole_borders,Config.targets,\
+            origin, resistance=Config.resistance,\
                 dt=Config.dt)
     game = pole.Game(environment,\
         Config.poles)

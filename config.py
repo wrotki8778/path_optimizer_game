@@ -6,6 +6,7 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY')\
         or 'my-unique-pass'
     pole_borders = np.array([[-5,5],[-5,5]], dtype=np.single)
+    targets = [[2,2],[2,-1]]
     resistance = 1/2
     dt = 1/4
     pole1 = pole.Obstacle(pole.mountain,[np.array([1,1]),5],"first_mountain")
