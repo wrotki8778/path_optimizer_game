@@ -21,8 +21,29 @@ class Obstacle:
         self.name = name
     def evaluate(self,pos):
         return(self.equation(pos,self.params))
+
+
+class Mountain(Obstacle):
+    def __init__(self,center,height,name):
+        super(Mountain,self).__init__(mountain,[center,height],name)
     def show(self):
-        plt.plot(self.params[0][0],self.params[0][1],'bo')
+        plt.plot(self.params[0][0],self.params[0][1],'ro',\
+            ms=self.params[1])
+
+class Target(Obstacle):
+    def __init__(self,params,name):
+        super(Target,self).__init__(dummy_pole,params,name)
+       
+
+class PointTarget(Target):
+    def __init__(self,center,name):
+        super(PointTarget,self).__init__(params=center,name=name)
+    def evaluate_score(self,path):
+        score = min((path[:,0] - self.params[0]) ** 2\
+                + (path[:,1] - self.params[1]) ** 2)
+        return score
+    def show(self):
+        plt.plot(self.params[0],self.params[1],'go')
 
 
 class Game:
@@ -54,15 +75,12 @@ class Game:
             time += self.environment.dt
             hist_pos = np.vstack((hist_pos,pos))
         return [time,hist_pos,pos,speed]
-    def evaluate_score(self,path,target):
-        score = min((path[:,0] - target[0]) ** 2\
-                + (path[:,1] - target[1]) ** 2)
         return(score)
     def print_report(self,user_input):
         time,hist_pos,pos,speed = self.path_simulation(user_input)
         score = 0
         for target in self.environment.targets:
-            score = score + self.evaluate_score(hist_pos,target)
+            score = score + target.evaluate_score(hist_pos)
         print("Simulation has ended after {} seconds. The point is located at \
             {:4f}, {:4f} placement. The speed at the end was equal to {:4f}.\
                  Thank you for the participation!".format(time,pos[0],pos[1],np.linalg.norm(speed)))
@@ -76,7 +94,7 @@ class Game:
         for obstacle in self.obstacles:
             obstacle.show()
         for target in self.environment.targets:
-            plt.plot(target[0],target[1],'og')
+            target.show()
         plt.title("Final score: %1.3f" %score)
         plt.savefig('app/static/images/foo.png')
 
@@ -89,6 +107,10 @@ def mountain(pos,params):
     else:
         distance = np.linalg.norm(diff)
         return np.exp(-distance**2)*magnitude*diff/distance
+
+def dummy_pole(pos,params):
+    return np.array([0,0])
+
 
 
 
