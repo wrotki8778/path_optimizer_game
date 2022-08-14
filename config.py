@@ -9,7 +9,7 @@ class Config(object):
     targets = [pole.PointTarget(center = [1,0],name="first_target"),
                 pole.PointTarget(center = [-1,-1],name="second_target")]
     resistance = 1/2
-    dt = 1/4
+    dt = 1/16
     pole1 = pole.Mountain(center= np.array([1,1]),\
             height = 5,name="first_mountain")
     pole2 = pole.Mountain(center= np.array([2,-1]),\

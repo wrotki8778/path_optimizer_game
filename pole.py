@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation,PillowWriter
 
 class Environment:
     def __init__(self, borders, targets, origin, resistance, dt):
@@ -26,8 +27,8 @@ class Obstacle:
 class Mountain(Obstacle):
     def __init__(self,center,height,name):
         super(Mountain,self).__init__(mountain,[center,height],name)
-    def show(self):
-        plt.plot(self.params[0][0],self.params[0][1],'ro',\
+    def show(self,graph):
+        graph.plot(self.params[0][0],self.params[0][1],'ro',\
             ms=self.params[1])
 
 class Target(Obstacle):
@@ -42,8 +43,8 @@ class PointTarget(Target):
         score = min((path[:,0] - self.params[0]) ** 2\
                 + (path[:,1] - self.params[1]) ** 2)
         return score
-    def show(self):
-        plt.plot(self.params[0],self.params[1],'go')
+    def show(self,graph):
+        graph.plot(self.params[0],self.params[1],'go')
 
 
 class Game:
@@ -68,35 +69,34 @@ class Game:
         time = 0
         speed = [user_input[0],user_input[1]]
         pos = self.environment.origin
-        hist_pos = pos
+        hist_pos = np.insert(pos,0,time,axis=0)
         while (not(self.stop_condition(pos,speed,time))):
+            time += self.environment.dt
             pos, speed = \
                 self.dynamics(pos,speed)
-            time += self.environment.dt
-            hist_pos = np.vstack((hist_pos,pos))
+            hist_pos = np.vstack((hist_pos,np.insert(pos,0,time,axis=0)))
         return [time,hist_pos,pos,speed]
-        return(score)
-    def print_report(self,user_input):
-        time,hist_pos,pos,speed = self.path_simulation(user_input)
+    def take_a_snapshot(self,hist_pos):
         score = 0
         for target in self.environment.targets:
             score = score + target.evaluate_score(hist_pos)
-        print("Simulation has ended after {} seconds. The point is located at \
-            {:4f}, {:4f} placement. The speed at the end was equal to {:4f}.\
-                 Thank you for the participation!".format(time,pos[0],pos[1],np.linalg.norm(speed)))
-        plt.close()
-        plt.figure(0)
-        plt.xlim(self.environment.borders[0,0],\
-            self.environment.borders[0,1]),
-        plt.ylim(self.environment.borders[1,0],\
-            self.environment.borders[1,1])
-        plt.plot(hist_pos[:,0],hist_pos[:,1], '--')
-        for obstacle in self.obstacles:
-            obstacle.show()
-        for target in self.environment.targets:
-            target.show()
-        plt.title("Final score: %1.3f" %score)
-        plt.savefig('app/static/images/foo.png')
+        fig,ax=plt.subplots()
+        def animate(i):
+            ax.clear()
+            ax.set_xlim(self.environment.borders[0,0],\
+                self.environment.borders[0,1]),
+            ax.set_ylim(self.environment.borders[1,0],\
+                self.environment.borders[1,1])
+            line, = ax.plot(hist_pos[0:i,1],hist_pos[0:i,2], '--')
+            for obstacle in self.obstacles:
+                obstacle.show(ax)
+            for target in self.environment.targets:
+                target.show(ax)
+            ax.set_title("Time: %1.3f Score: %1.3f" %(hist_pos[i,0],score))
+            return line,
+        animation = FuncAnimation(fig,animate,interval=40,blit=True\
+            ,repeat=False,frames=10)
+        animation.save("app/static/images/foo.gif",dpi=100,writer=PillowWriter(fps=10))
 
 def mountain(pos,params):
     center = params[0]
@@ -110,7 +110,6 @@ def mountain(pos,params):
 
 def dummy_pole(pos,params):
     return np.array([0,0])
-
 
 
 
