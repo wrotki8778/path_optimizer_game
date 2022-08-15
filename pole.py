@@ -20,8 +20,8 @@ class Obstacle:
         self.equation = equation
         self.params = params
         self.name = name
-    def evaluate(self,pos):
-        return(self.equation(pos,self.params))
+    def evaluate(self,x,y):
+        return(self.equation(x,y,self.params))
 
 
 class Mountain(Obstacle):
@@ -51,11 +51,14 @@ class Game:
     def __init__(self,environment,obstacles):
         self.environment = environment
         self.obstacles = obstacles
-    def pole_evaluate(self,pos):
-        return sum([pole.evaluate(pos) for pole in self.obstacles])
-    def dynamics(self,pos,speed):
+    def pole_evaluate(self,x=0,y=0):
+        stacked_poles = np.stack([pole.evaluate(x,y)\
+            for pole in self.obstacles],axis=-1)
+        return np.transpose(np.sum(stacked_poles,axis=-1))
+    def dynamics(self,pos=np.array([0,0],dtype=np.single)\
+        ,speed=0):
         velocity = np.linalg.norm(speed)
-        accel = self.pole_evaluate(pos) - self.environment.resistance\
+        accel = self.pole_evaluate(pos[0],pos[1]) - self.environment.resistance\
             *velocity*np.array(speed)
         speed_next = speed + self.environment.dt * np.array(accel)
         pos_next = pos + self.environment.dt * np.array(speed)
@@ -87,6 +90,19 @@ class Game:
                 self.environment.borders[0,1]),
             ax.set_ylim(self.environment.borders[1,0],\
                 self.environment.borders[1,1])
+            arg_xy = np.stack([np.repeat(np.linspace(\
+                self.environment.borders[0,0],\
+                self.environment.borders[0,1],11),11)\
+                    .reshape(11,11,order='F')\
+                    .reshape(121),\
+                np.repeat(np.linspace(\
+                self.environment.borders[0,0],\
+                self.environment.borders[0,1],11),11)\
+                    .reshape(11,11,order='C')\
+                    .reshape(121)],axis=1)
+            print(arg_xy)
+            vec_xy = self.pole_evaluate(arg_xy[:,0],arg_xy[:,1])
+            print(vec_xy)
             line, = ax.plot(hist_pos[0:i,1],hist_pos[0:i,2], '--')
             for obstacle in self.obstacles:
                 obstacle.show(ax)
@@ -98,18 +114,15 @@ class Game:
             ,repeat=False,frames=10)
         animation.save("app/static/images/foo.gif",dpi=100,writer=PillowWriter(fps=10))
 
-def mountain(pos,params):
-    center = params[0]
-    magnitude = params[1]
-    diff = pos-center
-    if not diff.any():
-        return np.array([0,0])
-    else:
-        distance = np.linalg.norm(diff)
-        return np.exp(-distance**2)*magnitude*diff/distance
+def mountain(x,y,params=[[0,0],1]):
+    return np.array([x,y],dtype=np.single)\
+        * params[1] * np.exp(-np.sqrt((np.subtract(x,params[0][0]))**2\
+        + (np.subtract(y,params[0][1]))**2) )*params[1]\
+        / np.sqrt((np.subtract(x,params[0][0]))**2 +\
+             (np.subtract(y,params[0][1]))**2  + 0.001)
 
-def dummy_pole(pos,params):
-    return np.array([0,0])
+def dummy_pole(x,y,params):
+    return np.array([0,0],dtype=np.single)
 
 
 
