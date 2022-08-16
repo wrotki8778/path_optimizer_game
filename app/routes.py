@@ -32,7 +32,7 @@ def evaluate():
                 dt=Config.dt)
     game = pole.Game(environment,\
         Config.poles)
-    time,hist_pos,pos,speed = game.path_simulation(user_input)       
+    time,hist_pos,pos,speed = game.path_simulation(user_input)
     game.take_a_snapshot(hist_pos)
     return(render_template('evaluate.html', \
         title = 'Obtain results',results_image ="foo.gif" ))

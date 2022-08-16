@@ -10,10 +10,12 @@ class Config(object):
                 pole.PointTarget(center = [-1,-1],name="second_target")]
     resistance = 1/2
     dt = 1/16
-    pole1 = pole.Mountain(center= np.array([1,1]),\
-            height = 5,name="first_mountain")
-    pole2 = pole.Mountain(center= np.array([2,-1]),\
-            height = 8,name="second_mountain")
+    pole1 = pole.Mountain(center= np.array([-3,1],\
+                dtype=np.single),\
+            height = 1,name="first_mountain")
+    pole2 = pole.Mountain(center= np.array([3,-1],\
+                dtype=np.single),\
+            height = 1,name="second_mountain")
     poles = [pole1,pole2]
     
     

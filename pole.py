@@ -66,8 +66,7 @@ class Game:
     def stop_condition(self,pos,speed,time):
         out_of_bounds=  self.environment.out_of_bounds(pos)
         timeout = time > 16
-        no_speed = np.linalg.norm(speed) < 1/16 and time > 1
-        return(no_speed or timeout or out_of_bounds)
+        return(timeout or out_of_bounds)
     def path_simulation(self,user_input):
         time = 0
         speed = [user_input[0],user_input[1]]
@@ -100,9 +99,12 @@ class Game:
                 self.environment.borders[0,1],11),11)\
                     .reshape(11,11,order='C')\
                     .reshape(121)],axis=1)
-            print(arg_xy)
             vec_xy = self.pole_evaluate(arg_xy[:,0],arg_xy[:,1])
-            print(vec_xy)
+            ax.quiver(arg_xy[:,0].reshape(11,11),\
+                arg_xy[:,1].reshape(11,11),
+                vec_xy[:,0].reshape(11,11),
+                vec_xy[:,1].reshape(11,11)
+                )
             line, = ax.plot(hist_pos[0:i,1],hist_pos[0:i,2], '--')
             for obstacle in self.obstacles:
                 obstacle.show(ax)
@@ -110,16 +112,21 @@ class Game:
                 target.show(ax)
             ax.set_title("Time: %1.3f Score: %1.3f" %(hist_pos[i,0],score))
             return line,
-        animation = FuncAnimation(fig,animate,interval=40,blit=True\
-            ,repeat=False,frames=10)
-        animation.save("app/static/images/foo.gif",dpi=100,writer=PillowWriter(fps=10))
+        animation = FuncAnimation(fig,animate,blit=True\
+            ,repeat=False,interval=40,frames=len(hist_pos[:,0]))
+        animation.save("app/static/images/foo.gif",dpi=100,writer=PillowWriter(fps=25))
 
 def mountain(x,y,params=[[0,0],1]):
-    return np.array([x,y],dtype=np.single)\
-        * params[1] * np.exp(-np.sqrt((np.subtract(x,params[0][0]))**2\
-        + (np.subtract(y,params[0][1]))**2) )*params[1]\
-        / np.sqrt((np.subtract(x,params[0][0]))**2 +\
-             (np.subtract(y,params[0][1]))**2  + 0.001)
+    return \
+        np.array((x-params[0][0],\
+         y-params[0][1]))\
+        * params[1] \
+        * np.exp(- np.sqrt(
+              (x-params[0][0])**2 \
+            + (y-params[0][1])**2 ))\
+        / ( np.sqrt( (x-params[0][0])**2 \
+           + (y-params[0][1])**2 ) \
+           + 0.001)
 
 def dummy_pole(x,y,params):
     return np.array([0,0],dtype=np.single)
