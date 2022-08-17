@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as clrs
 from matplotlib.animation import FuncAnimation,PillowWriter
 
 class Environment:
@@ -40,8 +41,8 @@ class PointTarget(Target):
     def __init__(self,center,name):
         super(PointTarget,self).__init__(params=center,name=name)
     def evaluate_score(self,path):
-        score = min((path[:,0] - self.params[0]) ** 2\
-                + (path[:,1] - self.params[1]) ** 2)
+        score = min((path[:,1] - self.params[0]) ** 2\
+                + (path[:,2] - self.params[1]) ** 2)
         return score
     def show(self,graph):
         graph.plot(self.params[0],self.params[1],'go')
@@ -100,11 +101,15 @@ class Game:
                     .reshape(11,11,order='C')\
                     .reshape(121)],axis=1)
             vec_xy = self.pole_evaluate(arg_xy[:,0],arg_xy[:,1])
+            norm_vec_xy = np.linalg.norm(vec_xy,axis=1)+0.001
             ax.quiver(arg_xy[:,0].reshape(11,11),\
                 arg_xy[:,1].reshape(11,11),
-                vec_xy[:,0].reshape(11,11),
-                vec_xy[:,1].reshape(11,11)
-                )
+                (vec_xy[:,0]/norm_vec_xy).reshape(11,11),
+                (vec_xy[:,1]/norm_vec_xy).reshape(11,11),
+                norm_vec_xy,
+                norm = clrs.LogNorm(vmin=norm_vec_xy.min(),\
+                    vmax=norm_vec_xy.max()),\
+                cmap = 'coolwarm')
             line, = ax.plot(hist_pos[0:i,1],hist_pos[0:i,2], '--')
             for obstacle in self.obstacles:
                 obstacle.show(ax)
