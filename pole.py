@@ -37,15 +37,17 @@ class Target(Obstacle):
         super(Target,self).__init__(dummy_pole,params,name)
        
 
-class PointTarget(Target):
-    def __init__(self,center,name):
-        super(PointTarget,self).__init__(params=center,name=name)
+class PathTarget(Target):
+    def __init__(self,centers,name):
+        super(PathTarget,self).__init__(params=centers,name=name)
     def evaluate_score(self,path):
-        score = min((path[:,1] - self.params[0]) ** 2\
-                + (path[:,2] - self.params[1]) ** 2)
-        return score
+        stacked_results = np.stack([(path[:,1]-center[0])**2\
+            + (path[:,2]-center[1])**2
+            for center in self.params],axis=-1)
+        return np.sum(np.min(stacked_results,axis=0)\
+                ,axis=-1)
     def show(self,graph):
-        graph.plot(self.params[0],self.params[1],'go')
+        graph.plot(self.params[:,0],self.params[:,1],'b-')
 
 
 class Game:
@@ -84,7 +86,7 @@ class Game:
         for target in self.environment.targets:
             score = score + target.evaluate_score(hist_pos)
         fig,ax=plt.subplots()
-        def animate(i):
+        def init():
             ax.clear()
             ax.set_xlim(self.environment.borders[0,0],\
                 self.environment.borders[0,1]),
@@ -110,15 +112,19 @@ class Game:
                 norm = clrs.LogNorm(vmin=norm_vec_xy.min(),\
                     vmax=norm_vec_xy.max()),\
                 cmap = 'coolwarm')
-            line, = ax.plot(hist_pos[0:i,1],hist_pos[0:i,2], '--')
             for obstacle in self.obstacles:
                 obstacle.show(ax)
             for target in self.environment.targets:
                 target.show(ax)
+            line, = ax.plot([],[], 'k-')
+            return line,
+        def animate(i):
+            line, = ax.plot(hist_pos[0:i,1],hist_pos[0:i,2], 'k-')
             ax.set_title("Time: %1.3f Score: %1.3f" %(hist_pos[i,0],score))
             return line,
         animation = FuncAnimation(fig,animate,blit=True\
-            ,repeat=False,interval=40,frames=len(hist_pos[:,0]))
+            ,repeat=False,interval=40,frames=len(hist_pos[:,0]),\
+                init_func=init)
         animation.save("app/static/images/foo.gif",dpi=100,writer=PillowWriter(fps=25))
 
 def mountain(x,y,params=[[0,0],1]):
